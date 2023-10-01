@@ -1,18 +1,22 @@
+import javax.swing.*;
 import java.io.*;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 public class Main {
     public static void main(String[] args) {
-//      dirInTerminal();  //1
-//      dirOnTerminal();  //2
-//      verDirectorioEspecifico("S:\\My Drive\\2ºDAM");  //OK
-//      ejecutarComando("dir");
+//        dirInTerminal();  //1
+//        dirOnTerminal();  //2
+//        verDirectorioEspecifico("S:\\My Drive\\2ºDAM");  //OK
+//        ejecutarComando("dir");
 //        mostrarProcesosUsuario("Usuario");
 //        ordenarTareasPor("MemUsage"); // No estoy seguro de que funcione correctamente
 //        porcentajeMemoriaUsuario("Usuario"); // Pinta bien pero no funciona, con ayuda de psinfo.exe descargado y alojado en C:/
 //        hacerPing("8.8.8.8"); //OK
 //        buscarArchivoEnDirectorio("C:\\PSTools","PsInfo64.exe"); //OK
+//        buscarCadenaTexto("ejercicio7.txt","resultados.txt","paciencia"); //OK
+//        infoDominio(); // OK
+
     }
 
 
@@ -242,11 +246,64 @@ public class Main {
             System.out.println("El proceso fue interrumpido");
             System.out.println(in.getMessage());
         }
-
-
-
-
     }
+
+    static void buscarCadenaTexto(String nombreArchivoOrigen, String nombreArchivoSalida, String palabra){
+        try {
+            File file = new File(nombreArchivoSalida);
+            FileWriter writer = new FileWriter(file);
+
+            ProcessBuilder processBuilder = new ProcessBuilder("cmd", "/C", "findstr " + palabra + " " + nombreArchivoOrigen);
+            Process process = processBuilder.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String linea;
+            while ((linea = reader.readLine()) != null) {
+                writer.write(linea + System.lineSeparator()); // Escribir cada línea en el archivo de salida
+            }
+            writer.close();
+            process.waitFor();
+
+        }catch (IOException io){
+            System.out.println(io.getMessage() + "Error en entrada o salida");
+        }catch (InterruptedException in){
+            System.out.println(in.getMessage() + "Proceso interrumpido");
+        }
+    }
+
+    static void infoDominio(){
+        Scanner scanner = new Scanner(System.in);
+        boolean salir = false;
+
+        while (!salir) {
+            System.out.print("Ingrese un nombre de dominio (o deje en blanco para salir): ");
+            String dominio = scanner.nextLine();
+
+            if (dominio.isEmpty()) {
+                System.out.println("Saliendo del programa.");
+                salir = true;
+            }
+            if (!salir){
+                try {
+                    ProcessBuilder processBuilder = new ProcessBuilder("cmd", "/C","nslookup " + dominio);
+                    Process proceso = processBuilder.start();
+
+                    BufferedReader lector = new BufferedReader(new InputStreamReader(proceso.getInputStream()));
+                    String linea;
+                    while ((linea = lector.readLine()) != null) {
+                        System.out.println(linea);
+                    }
+
+                    proceso.waitFor();
+                    lector.close();
+                } catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        scanner.close();
+    }
+
+
 }
 
 
